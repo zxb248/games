@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Island Council — Solo Prototype</title>
+  <title>Island Council — Solo (Health • Scores • Alliances)</title>
   <style>
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { margin:0; background:#0b1020; color:#e7eaf3; }
-    .wrap { max-width: 1050px; margin: 0 auto; padding: 20px; }
-    h1 { margin: 0 0 8px; font-size: 22px; }
-    .sub { opacity:.8; margin:0 0 14px; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 920px){ .grid{ grid-template-columns:1fr; } }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 18px; }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    .sub { opacity:.8; margin:0 0 12px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 960px){ .grid{ grid-template-columns:1fr; } }
     .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 14px; }
     .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
     .row > * { flex: 1; }
@@ -28,6 +28,7 @@
     .pill { display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px;
       background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); font-size: 13px; }
     .muted { opacity:.75; font-size: 13px; }
+    .small { font-size: 12px; opacity:.85; }
     .hr { height:1px; background: rgba(255,255,255,.10); margin: 12px 0; }
     table { width:100%; border-collapse: collapse; font-size: 13px; }
     th, td { text-align:left; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.10); vertical-align: top; }
@@ -36,30 +37,33 @@
       background: rgba(80,180,255,.18); border: 1px solid rgba(80,180,255,.28); }
     .tag2 { display:inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px;
       background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
-    .log { max-height: 320px; overflow:auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); }
-    .log .line { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .log .line:last-child { border-bottom: none; }
-    .name { font-weight: 700; }
-    .small { font-size: 12px; opacity:.85; }
     .good { color: #a8ffb5; }
     .bad { color: #ff9fb2; }
     .warn { color: #ffd38a; }
+
+    .log { max-height: 340px; overflow:auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); }
+    .log .line { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .log .line:last-child { border-bottom: none; }
+    .name { font-weight: 750; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Island Council — Solo Prototype</h1>
+    <h1>Island Council — Solo</h1>
     <p class="sub">
-      You play alone. The computer simulates NPCs (dialogue, alliances, votes).
+      Single-player. The computer simulates NPC <b>dialogue</b>, <b>alliances</b>, and <b>votes</b>.
       <span class="pill" id="roundPill">Round: —</span>
       <span class="pill" id="captainPill">Speaker Captain: —</span>
     </p>
 
     <div class="grid">
+      <!-- Controls -->
       <div class="card">
         <div class="row">
           <button class="primary" id="newGameBtn">New Game</button>
-          <button id="nextRoundBtn" class="primary" disabled>Run Next Round</button>
+          <button class="primary" id="startRoundBtn" disabled>Start Round</button>
+          <button class="primary" id="confirmPickBtn" disabled>Confirm Water Pick</button>
           <button class="danger" id="resetBtn">Reset</button>
         </div>
 
@@ -73,32 +77,34 @@
 
         <div class="hr"></div>
 
-        <h3 style="margin:0 0 8px; font-size:15px;">Your Choice (one decision)</h3>
         <div class="muted">
-          Each round you choose who receives <b>Water</b>. Only one person can receive it.
-          The Water recipient becomes <b>Speaker Captain</b> next round (controls speaking order).
+          <b>One decision:</b> pick who gets <b>Water</b> this round.<br/>
+          <b>One constraint:</b> only <b>one</b> person can receive it.<br/>
+          <b>One consequence:</b> the Water recipient becomes <b>Speaker Captain</b> next round (controls speaking order).
         </div>
 
         <label style="margin-top:10px;">Pick Water recipient</label>
         <select id="waterPick"></select>
 
         <div class="row" style="margin-top:10px;">
-          <button id="confirmPickBtn" class="primary" disabled>Confirm Water Pick</button>
-          <button id="autoPickBtn">Suggest Pick</button>
+          <button id="suggestBtn">Suggest Pick</button>
+          <span class="pill"><span class="small">Round phase:</span> <b id="phaseLabel">—</b></span>
         </div>
 
         <div class="hr"></div>
 
         <div class="muted small">
-          <b>Stats:</b> Health (0–10), Independence (0–2), Selfish Index (0–2), Alliance Need (0–2), Skill (1 of 4).
-          <br/>
-          <b>Health tick:</b> Indep 0 = -2, Indep 1 = -1, Indep 2 = 0 each round.
+          <b>Character traits (minimal, high dynamics):</b><br/>
+          Health (0–10), Independence (0–2), Selfish Index (0–2), Alliance Need (0–2), Skill (Builder/Medic/Hunter/Navigator).<br/>
+          <b>Health tick:</b> Indep 0 = -2, Indep 1 = -1, Indep 2 = 0 each round.<br/>
+          <b>Collapse:</b> Health 0 ⇒ can’t speak/vote for <b>1 round</b> (still “in” the game).
         </div>
       </div>
 
+      <!-- Characters -->
       <div class="card">
         <h3 style="margin:0 0 8px; font-size:15px;">Characters</h3>
-        <div class="muted">No one is eliminated. When Health hits 0, they “collapse” and can’t speak/vote for 1 round.</div>
+        <div class="muted">Alliances are mutual (both choose each other). Betrayal increases Selfish score.</div>
         <div class="hr"></div>
 
         <table id="charsTable">
@@ -111,12 +117,14 @@
               <th>Alliance</th>
               <th>Skill</th>
               <th>Status</th>
+              <th>Ally</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
 
+      <!-- Log -->
       <div class="card" style="grid-column: 1 / -1;">
         <h3 style="margin:0 0 8px; font-size:15px;">Round Log</h3>
         <div class="log" id="log"></div>
@@ -125,71 +133,89 @@
   </div>
 
   <script>
-    // ----------------------------
-    // Minimal Solo Game Engine
-    // ----------------------------
+    /***********************
+     * SOLO GAME (MVP)
+     * Health • Scores • Alliances • NPC Votes • Speaker Captain
+     ***********************/
+
+    // --- Constants ---
     const SKILLS = ["Builder", "Medic", "Hunter", "Navigator"];
+    const NAMES  = ["Jordan","Avery","Sam","Taylor","Casey","Riley","Morgan","Quinn","Cameron","Drew","Alex","Jamie","Blake","Harper"];
 
-    const NAMES = ["Jordan","Avery","Sam","Taylor","Casey","Riley","Morgan","Quinn","Cameron","Drew","Alex","Jamie"];
-
-    function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
-    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-
-    // Dialogue templates: simple + effective (no external AI).
+    // Dialogue templates by Selfish Index (0 community → 2 selfish)
     const DIALOGUE = {
-      2: [ // selfish
+      2: [
         "I’m not giving water away without a return.",
         "We need strength, not sympathy.",
-        "If we keep saving the weak, we all go down.",
-        "I’m watching who’s useful. That’s the only logic."
+        "I’m watching who’s useful. That’s the only logic.",
+        "If we keep saving the weak, we all go down."
       ],
-      1: [ // mixed
+      1: [
         "I get both sides—who helps us tomorrow?",
-        "I’ll support the choice that improves our odds.",
         "We need a plan, not just feelings.",
-        "Convince me this isn’t a mistake."
+        "Convince me this improves our odds.",
+        "I’ll support what’s most rational."
       ],
-      0: [ // community
+      0: [
         "If we ignore the vulnerable, we lose our humanity.",
         "We should protect whoever is in real danger.",
-        "Let’s choose what keeps the group together.",
-        "Care is strategy. It keeps us alive."
+        "Care is strategy. It keeps us alive.",
+        "Let’s choose what keeps the group together."
       ]
     };
 
+    // --- State ---
     const state = {
       started: false,
       round: 0,
       maxRounds: 8,
+
+      // shared meters
       community: 6,
       selfish: 4,
-      speakerCaptainId: null, // affects speaking order
-      chars: [], // includes player + NPCs
+
+      // social power
+      speakerCaptainId: null, // applies this round (speaking order). For round 1, null.
+
+      // roster: includes player + NPCs
+      chars: [],
+
+      // phase control
+      phase: "idle", // idle | round_started | awaiting_pick | resolved | over
       pendingPickId: null,
     };
 
-    // Character model:
-    // { id, name, isPlayer, health, indep, selfish, allianceNeed, skill, collapsedUntilRound, allyIdLastRound, helpedLastRoundBy }
-
-    function newChar({name, isPlayer=false}) {
+    // Character:
+    // { id, name, isPlayer, health, indep, selfish, allianceNeed, skill, collapsedUntilRound,
+    //   allyId, helpedByLastRoundId }
+    function makeChar({name, isPlayer=false}) {
       return {
         id: crypto.randomUUID(),
         name,
         isPlayer,
         health: isPlayer ? 8 : randInt(5, 10),
-        indep: isPlayer ? 1 : randInt(0, 2),
+        indep:  isPlayer ? 1 : randInt(0, 2),
         selfish: isPlayer ? 1 : randInt(0, 2),
         allianceNeed: isPlayer ? 1 : randInt(0, 2),
         skill: pick(SKILLS),
-        collapsedUntilRound: 0, // if > current round, can't act
-        allyIdLastRound: null,
-        helpedLastRoundBy: null,
+        collapsedUntilRound: 0,
+        allyId: null,
+        helpedByLastRoundId: null,
       };
     }
 
-    // UI helpers
+    // --- Helpers ---
     const $ = (id) => document.getElementById(id);
+    function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[s]));
+    }
+    function findChar(id){ return state.chars.find(c => c.id === id); }
+    function isCollapsed(c){ return state.round < c.collapsedUntilRound; }
 
     function logLine(html){
       const log = $("log");
@@ -198,457 +224,471 @@
       div.innerHTML = html;
       log.prepend(div);
     }
-
     function clearLog(){ $("log").innerHTML = ""; }
 
-    function render() {
+    // --- Rendering ---
+    function renderTop() {
       $("roundPill").textContent = state.started ? `Round: ${state.round}/${state.maxRounds}` : "Round: —";
+
+      const captainName = state.speakerCaptainId ? (findChar(state.speakerCaptainId)?.name || "—") : "—";
+      $("captainPill").textContent = `Speaker Captain: ${captainName}`;
+
       $("communityScore").textContent = state.started ? state.community : "—";
       $("selfishScore").textContent = state.started ? state.selfish : "—";
+      $("phaseLabel").textContent = state.started ? state.phase : "—";
 
-      const player = state.chars.find(c => c.isPlayer);
+      const player = state.chars.find(c=>c.isPlayer);
       $("yourHealth").textContent = state.started ? player.health : "—";
 
-      const captainName = state.speakerCaptainId ? state.chars.find(c=>c.id===state.speakerCaptainId)?.name : "—";
-      $("captainPill").textContent = `Speaker Captain: ${captainName || "—"}`;
+      // Buttons
+      $("startRoundBtn").disabled = !state.started || state.phase === "awaiting_pick" || state.phase === "over" || state.round >= state.maxRounds;
+      $("confirmPickBtn").disabled = !state.started || state.phase !== "awaiting_pick" || !state.pendingPickId || state.phase === "over";
+    }
 
-      // Table
+    function renderChars() {
       const tbody = $("charsTable").querySelector("tbody");
       tbody.innerHTML = "";
+
       for (const c of state.chars) {
-        const isCollapsed = state.round < c.collapsedUntilRound;
+        const allyName = c.allyId ? (findChar(c.allyId)?.name || "—") : "—";
+        const status = isCollapsed(c) ? `<span class="bad">Collapsed</span>` : `<span class="good">Active</span>`;
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>
-            <span class="name">${escapeHtml(c.name)}</span>
-            ${c.isPlayer ? ' <span class="tag">You</span>' : ''}
-          </td>
+          <td><span class="name">${escapeHtml(c.name)}</span> ${c.isPlayer ? `<span class="tag">You</span>` : ""}</td>
           <td>${c.health}</td>
           <td>${c.indep}</td>
           <td>${c.selfish}</td>
           <td>${c.allianceNeed}</td>
           <td><span class="tag2">${escapeHtml(c.skill)}</span></td>
-          <td>${isCollapsed ? '<span class="bad">Collapsed</span>' : '<span class="good">Active</span>'}</td>
+          <td>${status}</td>
+          <td>${escapeHtml(allyName)}</td>
         `;
         tbody.appendChild(tr);
       }
+    }
 
-      // Water pick dropdown
+    function renderPickDropdown() {
       const sel = $("waterPick");
       sel.innerHTML = "";
       for (const c of state.chars) {
-        const isCollapsed = state.round < c.collapsedUntilRound;
         const opt = document.createElement("option");
         opt.value = c.id;
-        opt.textContent = `${c.name}${c.isPlayer ? " (You)" : ""}${isCollapsed ? " [Collapsed]" : ""} — H:${c.health} I:${c.indep} S:${c.selfish} Skill:${c.skill}`;
+        opt.textContent =
+          `${c.name}${c.isPlayer ? " (You)" : ""}` +
+          ` — H:${c.health} I:${c.indep} S:${c.selfish} A:${c.allianceNeed} Skill:${c.skill}` +
+          (isCollapsed(c) ? " [Collapsed]" : "");
         sel.appendChild(opt);
       }
-
-      $("nextRoundBtn").disabled = !state.started || state.round >= state.maxRounds || isGameOver().over;
-      $("confirmPickBtn").disabled = !state.started || state.round === 0 || state.pendingPickId == null || isGameOver().over;
+      // keep selection stable
+      if (state.pendingPickId) sel.value = state.pendingPickId;
+      else state.pendingPickId = sel.value;
     }
 
-    function escapeHtml(str){
-      return String(str).replace(/[&<>"']/g, s => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[s]));
+    function renderAll() {
+      renderTop();
+      renderChars();
+      renderPickDropdown();
     }
 
-    function isGameOver(){
-      if (!state.started) return { over:false, reason:"" };
-      const player = state.chars.find(c=>c.isPlayer);
-      if (player.health <= 0) return { over:true, reason:"You collapsed (Health reached 0)." };
-      if (state.community <= 0) return { over:true, reason:"Community collapsed (Community score reached 0)." };
-      if (state.selfish >= 10 && state.community <= 2) return { over:true, reason:"The group fragmented (Selfish dominated)." };
-      return { over:false, reason:"" };
-    }
+    // --- Core Systems ---
 
-    // ----------------------------
-    // Core Mechanics
-    // ----------------------------
-
-    // Health tick based on independence
-    function applyHealthTick(){
+    // 1) Health Tick
+    function applyHealthTick() {
       for (const c of state.chars) {
-        if (state.round < c.collapsedUntilRound) continue; // already collapsed, skip tick this round
+        if (isCollapsed(c)) continue; // if collapsed this round, they already are out of action
         const loss = (c.indep === 0) ? 2 : (c.indep === 1 ? 1 : 0);
         c.health = clamp(c.health - loss, 0, 10);
         if (c.health === 0) {
           c.collapsedUntilRound = state.round + 1; // can't act next round
         }
       }
+      logLine(`<span class="muted">Health tick applied (based on Independence).</span>`);
     }
 
-    // Choose alliances for NPCs (simple)
-    function computeAlliances(){
-      // reset
-      for (const c of state.chars) if (!c.isPlayer) c.allyIdLastRound = null;
+    // 2) Alliances (mutual picks)
+    function computeAlliances() {
+      // clear prior alliances each round (keeps it simple)
+      for (const c of state.chars) c.allyId = null;
 
-      // Each NPC picks one ally candidate (or null)
-      const picks = new Map(); // npcId -> allyId
-      const candidates = state.chars.map(c=>c.id);
+      const picks = new Map(); // id -> picked ally id
+      const active = state.chars.filter(c => !isCollapsed(c));
 
-      for (const npc of state.chars.filter(c=>!c.isPlayer)) {
-        if (state.round < npc.collapsedUntilRound) continue;
-
-        // Alliance desire increases when low health or high allianceNeed
+      for (const npc of active.filter(c => !c.isPlayer)) {
+        // Want an ally if allianceNeed high or health low
         const desire = npc.allianceNeed + (npc.health <= 4 ? 1 : 0);
         if (desire <= 0) continue;
 
-        // Pick ally by "safety + usefulness + similarity"
-        let best = null, bestScore = -1e9;
-        for (const cid of candidates) {
-          if (cid === npc.id) continue;
-          const other = state.chars.find(x=>x.id===cid);
-          if (state.round < other.collapsedUntilRound) continue;
+        let bestId = null;
+        let bestScore = -1e9;
 
-          let s = 0;
-          // usefulness: skills that help group are valued more by community-ish NPCs
-          const groupValue = (other.skill === "Medic" ? 2 : (other.skill === "Hunter" ? 2 : 1));
-          s += groupValue * (npc.selfish === 0 ? 2 : 1);
+        for (const other of active) {
+          if (other.id === npc.id) continue;
 
-          // safety: prefer healthier allies if selfish, prefer vulnerable if community
-          s += (npc.selfish === 2 ? other.health : (10 - other.health)) * 0.2;
+          // Alliance scoring: usefulness + safety + similarity + reciprocity
+          let score = 0;
 
-          // similarity helps alliances form
-          s += (other.selfish === npc.selfish ? 1 : 0);
-          s += (other.indep === npc.indep ? 0.5 : 0);
+          // usefulness: Medic/Hunter very attractive
+          score += (other.skill === "Medic" ? 3 : other.skill === "Hunter" ? 3 : other.skill === "Navigator" ? 2 : 2);
 
-          // reciprocity: if other helped them last round, big boost
-          s += (npc.helpedLastRoundBy === other.id ? 3 : 0);
+          // community NPCs like helping vulnerable allies; selfish like strong protectors
+          score += (npc.selfish === 0 ? (10 - other.health) * 0.25 : other.health * 0.25);
 
-          // selfish NPCs avoid empowering "too strong" competitors
-          if (npc.selfish === 2 && other.health >= 8) s -= 1;
+          // similarity creates cohesion
+          score += (npc.selfish === other.selfish ? 1 : 0);
+          score += (npc.indep === other.indep ? 0.5 : 0);
 
-          if (s > bestScore) { bestScore = s; best = other.id; }
+          // reciprocity
+          score += (npc.helpedByLastRoundId === other.id ? 2.5 : 0);
+
+          // selfish avoid super-strong competitors unless needed
+          if (npc.selfish === 2 && other.health >= 9) score -= 1.2;
+
+          if (score > bestScore) { bestScore = score; bestId = other.id; }
         }
-        if (best) picks.set(npc.id, best);
+
+        if (bestId) picks.set(npc.id, bestId);
       }
 
-      // Alliances are mutual picks
+      // Mutual only
       const alliances = [];
       for (const [a, b] of picks.entries()) {
         if (picks.get(b) === a) {
-          alliances.push([a,b]);
+          findChar(a).allyId = b;
+          findChar(b).allyId = a;
+          alliances.push([a, b]);
         }
       }
-      // Store
-      for (const [a,b] of alliances) {
-        const A = state.chars.find(x=>x.id===a);
-        const B = state.chars.find(x=>x.id===b);
-        if (A) A.allyIdLastRound = b;
-        if (B) B.allyIdLastRound = a;
+
+      if (alliances.length) {
+        const pretty = alliances.map(([a,b]) => `${findChar(a).name} ↔ ${findChar(b).name}`).join(", ");
+        logLine(`<span class="warn"><b>Alliances formed:</b></span> ${escapeHtml(pretty)}`);
+      } else {
+        logLine(`<span class="muted">No alliances formed this round.</span>`);
       }
 
       return alliances;
     }
 
-    // NPC dialogue: 1 line each, ordered by Speaker Captain effect
-    function npcDialogue(){
-      const order = speakingOrderForThisRound();
-      for (const cid of order) {
-        const c = state.chars.find(x=>x.id===cid);
+    // 3) Speaking order (Speaker Captain effect)
+    function speakingOrderIds() {
+      const active = state.chars.filter(c => !isCollapsed(c));
+      if (!state.speakerCaptainId) {
+        // round 1: random-ish order but keep player near end for pressure
+        const player = active.find(c=>c.isPlayer);
+        const npcs = active.filter(c=>!c.isPlayer).sort(() => Math.random() - 0.5);
+        return [...npcs.map(c=>c.id), player?.id].filter(Boolean);
+      }
+      const captain = findChar(state.speakerCaptainId);
+      const ally = captain?.allyId || null;
+
+      const playerId = active.find(c=>c.isPlayer)?.id;
+      const rest = active.map(c=>c.id).filter(id => id !== captain.id && id !== ally && id !== playerId);
+
+      // captain → ally → rest → player
+      return [captain.id, ally, ...rest, playerId].filter(Boolean);
+    }
+
+    // 4) NPC Dialogue (generated)
+    function npcDialoguePhase() {
+      logLine(`<span class="muted"><b>Discussion</b> (Speaker Captain influences order):</span>`);
+      const order = speakingOrderIds();
+      for (const id of order) {
+        const c = findChar(id);
         if (!c || c.isPlayer) continue;
-        if (state.round < c.collapsedUntilRound) {
+
+        if (isCollapsed(c)) {
           logLine(`<span class="name">${escapeHtml(c.name)}</span>: <span class="muted">(...collapsed, no comment)</span>`);
           continue;
         }
+
         const base = pick(DIALOGUE[c.selfish]);
-        const add = dialogueAddon(c);
-        logLine(`<span class="name">${escapeHtml(c.name)}</span>: “${escapeHtml(base)}${add}”`);
+        const addon = buildDialogueAddon(c);
+        logLine(`<span class="name">${escapeHtml(c.name)}</span>: “${escapeHtml(base)}${addon}”`);
       }
     }
 
-    function dialogueAddon(c){
-      // Add tiny context to make it feel responsive
+    function buildDialogueAddon(c) {
+      // tiny dynamic flavor
       if (c.health <= 3) return ` <span class="small warn">(My health is low.)</span>`;
-      if (c.allyIdLastRound) return ` <span class="small">(I’m with ${escapeHtml(state.chars.find(x=>x.id===c.allyIdLastRound)?.name || "someone")}.)</span>`;
+      if (c.allyId) return ` <span class="small">(I’m with ${escapeHtml(findChar(c.allyId)?.name || "someone")}.)</span>`;
       return "";
     }
 
-    // Speaker Captain controls speaking order NEXT round; in solo, we simulate order:
-    // Captain first, then captain's ally (if any), then others, then the player's line last (you decide).
-    function speakingOrderForThisRound(){
-      const ids = state.chars.map(c=>c.id);
-      const captainId = state.speakerCaptainId;
-      if (!captainId) return ids; // round 1: free-for-all
-
-      const captain = state.chars.find(c=>c.id===captainId);
-      const ally = captain?.allyIdLastRound || null;
-
-      const rest = ids.filter(id => id !== captainId && id !== ally);
-      // Put player near the end to increase "voice pressure"
-      const playerId = state.chars.find(c=>c.isPlayer)?.id;
-      const restNoPlayer = rest.filter(id => id !== playerId);
-      const withPlayerLast = playerId ? [...restNoPlayer, playerId] : restNoPlayer;
-
-      const order = [captainId];
-      if (ally) order.push(ally);
-      order.push(...withPlayerLast.filter(Boolean));
-      return order;
-    }
-
-    // NPC voting for water recipient
-    function npcVotes(){
+    // 5) NPC Votes (generated) for Water recipient
+    function npcVotes() {
       const votes = []; // { voterId, targetId, reason }
-      const candidates = state.chars.map(c=>c.id);
+      const candidates = state.chars.filter(c => !isCollapsed(c)); // can't vote for collapsed
+      const activeVoters = state.chars.filter(c => !c.isPlayer && !isCollapsed(c));
 
-      for (const npc of state.chars.filter(c=>!c.isPlayer)) {
-        if (state.round < npc.collapsedUntilRound) continue;
+      for (const voter of activeVoters) {
+        let best = null;
+        let bestScore = -1e9;
+        let bestReason = "";
 
-        let best = null, bestScore = -1e9, bestReason = "";
-        for (const cid of candidates) {
-          const target = state.chars.find(x=>x.id===cid);
-          if (!target) continue;
-          if (state.round < target.collapsedUntilRound) continue; // don't vote for collapsed
-
-          const {score, reason} = scoreVote(npc, target);
-          if (score > bestScore) { bestScore = score; best = cid; bestReason = reason; }
+        for (const target of candidates) {
+          const {score, reason} = scoreVote(voter, target);
+          if (score > bestScore) { bestScore = score; best = target; bestReason = reason; }
         }
-        if (best) votes.push({ voterId: npc.id, targetId: best, reason: bestReason });
+
+        if (best) votes.push({ voterId: voter.id, targetId: best.id, reason: bestReason });
       }
+
       return votes;
     }
 
-    function scoreVote(voter, target){
-      // Minimal but dynamic scoring
+    function scoreVote(voter, target) {
       let score = 0;
-      const need = (10 - target.health); // higher need when low health
-      const groupSkillValue = (target.skill === "Medic" ? 3 : (target.skill === "Hunter" ? 3 : (target.skill === "Navigator" ? 2 : 2)));
 
-      // Community-minded voters weight need and group value
+      const need = (10 - target.health); // need increases as health low
+      const groupValue =
+        (target.skill === "Medic" ? 3 :
+         target.skill === "Hunter" ? 3 :
+         target.skill === "Navigator" ? 2 : 2);
+
+      // Community-minded: prioritize need + group value
       if (voter.selfish === 0) {
         score += need * 1.2;
-        score += groupSkillValue * 1.0;
+        score += groupValue * 1.0;
       }
-      // Mixed voters balance
+      // Mixed: balance
       if (voter.selfish === 1) {
         score += need * 0.7;
-        score += groupSkillValue * 1.1;
+        score += groupValue * 1.1;
       }
-      // Selfish voters prioritize allies + power dynamics
+      // Selfish: prioritize strength + alliances; less compassion
       if (voter.selfish === 2) {
-        score += groupSkillValue * 0.8;
-        score += (target.health >= 7 ? 1.0 : 0); // prefer strength
-        score -= need * 0.3; // less likely to help vulnerable
+        score += (target.health >= 7 ? 1.2 : 0);
+        score += groupValue * 0.8;
+        score -= need * 0.3;
       }
 
-      // Alliance bias
-      if (voter.allyIdLastRound === target.id) score += 3 + voter.allianceNeed;
+      // Alliance bias (major)
+      if (voter.allyId === target.id) score += 3 + voter.allianceNeed;
 
-      // Reciprocity
-      if (voter.helpedLastRoundBy === target.id) score += 2;
+      // Reciprocity bias
+      if (voter.helpedByLastRoundId === target.id) score += 2;
 
-      // Selfish voters avoid empowering very strong competitors (unless allied)
-      if (voter.selfish === 2 && target.health >= 9 && voter.allyIdLastRound !== target.id) score -= 1.5;
+      // Self vote bias for selfish NPCs
+      if (target.id === voter.id) score += (voter.selfish === 2 ? 2.2 : 0.2);
 
-      // If target is voter themself: selfish voters often self-vote
-      if (target.id === voter.id) score += (voter.selfish === 2 ? 2.5 : 0.2);
+      // Avoid empowering super-strong competitors if selfish and not allied
+      if (voter.selfish === 2 && target.health >= 9 && voter.allyId !== target.id) score -= 1.3;
 
-      // Build a simple reason string (used in log)
-      const reasonParts = [];
-      if (voter.allyIdLastRound === target.id) reasonParts.push("alliance");
-      if (target.health <= 4) reasonParts.push("low health");
-      if (target.skill === "Medic") reasonParts.push("medic");
-      if (target.skill === "Hunter") reasonParts.push("food/water skill");
-      if (!reasonParts.length) reasonParts.push("best odds");
-      const reason = `I voted ${target.name} because ${reasonParts.join(", ")}.`;
+      // Reason string
+      const parts = [];
+      if (voter.allyId === target.id) parts.push("alliance");
+      if (target.health <= 4) parts.push("low health");
+      if (target.skill === "Medic") parts.push("medic");
+      if (target.skill === "Hunter") parts.push("hunter");
+      if (!parts.length) parts.push("best odds");
+      const reason = `I voted ${target.name} because ${parts.join(", ")}.`;
 
       return { score, reason };
     }
 
-    // Apply your pick + NPC votes to decide water recipient (majority including you)
-    function resolveWaterRecipient(playerPickId, npcVotesArr){
+    // 6) Resolve group vote (player + NPCs)
+    function resolveVote(playerPickId, npcVotesArr) {
       const tally = new Map();
       for (const c of state.chars) tally.set(c.id, 0);
 
-      // Your vote counts as 1
+      // player's vote
       tally.set(playerPickId, (tally.get(playerPickId) || 0) + 1);
 
-      // NPC votes
+      // npc votes
       for (const v of npcVotesArr) {
         tally.set(v.targetId, (tally.get(v.targetId) || 0) + 1);
       }
 
-      let max = -1e9, winners = [];
+      let max = -1e9;
+      let winners = [];
       for (const [id, n] of tally.entries()) {
         if (n > max) { max = n; winners = [id]; }
         else if (n === max) winners.push(id);
       }
-      const winnerId = winners[randInt(0, winners.length-1)];
-      return { winnerId, tally, max, tied: winners.length > 1, winners };
+
+      const winnerId = winners[Math.floor(Math.random() * winners.length)];
+      return { winnerId, tally, max, winners, tied: winners.length > 1 };
     }
 
-    // Update Community/Selfish scores based on fairness + alliances
-    function updateMeters(winnerId, npcVotesArr){
-      const winner = state.chars.find(c=>c.id===winnerId);
-      const player = state.chars.find(c=>c.isPlayer);
+    // 7) Update meters + global health effect
+    function updateMetersAndEffects(winnerId, npcVotesArr) {
+      const winner = findChar(winnerId);
 
-      // "Need-based" choice increases community; "power-based" choice increases selfish
-      const need = 10 - winner.health;
+      // heuristic: if choice supports vulnerability / group utility => community up; if reinforces power/selfishness => selfish up
+      const communityLean =
+        (winner.health <= 4 ? 2 : 0) +
+        (winner.skill === "Medic" ? 2 : 0) +
+        (winner.skill === "Hunter" ? 1 : 0) +
+        (winner.selfish === 0 ? 1 : 0);
 
-      // Community-minded choice heuristic: low health or Medic/Hunter = community
-      const communityLean = (winner.health <= 4 ? 2 : 0) + (winner.skill === "Medic" ? 2 : 0) + (winner.skill === "Hunter" ? 1 : 0);
-      const selfishLean = (winner.health >= 8 ? 2 : 0) + (winner.selfish === 2 ? 1 : 0);
+      const selfishLean =
+        (winner.health >= 8 ? 2 : 0) +
+        (winner.selfish === 2 ? 2 : 0) +
+        (winner.skill === "Builder" ? 0.5 : 0); // builder is fine but not immediate care
 
-      // Shift scores slightly each round
-      state.community = clamp(state.community + (communityLean >= selfishLean ? 1 : 0), 0, 10);
-      state.selfish   = clamp(state.selfish   + (selfishLean > communityLean ? 1 : 0), 0, 10);
+      if (communityLean >= selfishLean) state.community = clamp(state.community + 1, 0, 10);
+      if (selfishLean > communityLean)  state.selfish   = clamp(state.selfish + 1, 0, 10);
 
-      // Betrayal: if an NPC has an ally but voted against them, increase selfish
+      // betrayal: if voter has ally but voted away from ally
       for (const v of npcVotesArr) {
-        const voter = state.chars.find(c=>c.id===v.voterId);
+        const voter = findChar(v.voterId);
         if (!voter) continue;
-        if (voter.allyIdLastRound && voter.allyIdLastRound !== v.targetId) {
+        if (voter.allyId && voter.allyId !== v.targetId) {
           state.selfish = clamp(state.selfish + 1, 0, 10);
-          logLine(`<span class="small bad">Betrayal:</span> ${escapeHtml(voter.name)} didn’t vote with their ally.`);
+          logLine(`<span class="bad"><b>Betrayal:</b></span> ${escapeHtml(voter.name)} didn’t vote with their ally.`);
         }
       }
 
-      // Global effect: if community > selfish, small heal; if selfish > community, small damage
+      // global effect (simple + visible)
       if (state.community > state.selfish) {
         for (const c of state.chars) c.health = clamp(c.health + 1, 0, 10);
-        logLine(`<span class="good">Group Effect:</span> Community dominates → everyone gains +1 Health.`);
+        logLine(`<span class="good"><b>Group effect:</b></span> Community dominates → everyone gains <b>+1 Health</b>.`);
       } else if (state.selfish > state.community) {
         for (const c of state.chars) c.health = clamp(c.health - 1, 0, 10);
-        logLine(`<span class="bad">Group Effect:</span> Selfish dominates → everyone loses -1 Health.`);
+        logLine(`<span class="bad"><b>Group effect:</b></span> Selfish dominates → everyone loses <b>-1 Health</b>.`);
       } else {
-        logLine(`<span class="muted">Group Effect:</span> Scores tied → no global change.`);
+        logLine(`<span class="muted"><b>Group effect:</b></span> Scores tied → no global change.`);
       }
 
-      // Track who helped whom (for reciprocity next round): winner "helped" everyone who voted for them
+      // reciprocity: anyone who voted for the winner marks "helpedByLastRoundId"
       for (const v of npcVotesArr) {
-        const voter = state.chars.find(c=>c.id===v.voterId);
-        if (voter && v.targetId === winnerId) voter.helpedLastRoundBy = winnerId;
+        if (v.targetId === winnerId) {
+          const voter = findChar(v.voterId);
+          if (voter) voter.helpedByLastRoundId = winnerId;
+        }
       }
-      // If you voted for winner, you consider them as helping you (can affect their alliance with you indirectly)
-      if (playerPickId === winnerId) player.helpedLastRoundBy = winnerId;
     }
 
-    // Suggest pick for player (simple heuristic)
-    function suggestPick(){
-      // Prefer lowest health among active, with tie-breaker for Medic/Hunter
-      const active = state.chars.filter(c => state.round >= c.collapsedUntilRound);
-      active.sort((a,b) => {
-        const aScore = (a.health) + (a.skill === "Medic" ? -1 : 0) + (a.skill === "Hunter" ? -0.5 : 0);
-        const bScore = (b.health) + (b.skill === "Medic" ? -1 : 0) + (b.skill === "Hunter" ? -0.5 : 0);
-        return aScore - bScore;
+    // 8) Game over rules
+    function gameOverCheck() {
+      const player = state.chars.find(c=>c.isPlayer);
+      if (player.health <= 0) return { over: true, reason: "You collapsed (Health reached 0)." };
+      if (state.community <= 0) return { over: true, reason: "Community collapsed (Community score reached 0)." };
+      if (state.selfish >= 10 && state.community <= 2) return { over: true, reason: "The group fragmented (Selfish dominated)." };
+      return { over: false, reason: "" };
+    }
+
+    // --- Player helpers ---
+    function suggestPickId() {
+      // Minimal “good faith” heuristic: help lowest health active person; tie-break medic/hunter
+      const candidates = state.chars.filter(c => !isCollapsed(c));
+      candidates.sort((a,b) => {
+        const aBonus = (a.skill === "Medic" ? -1.2 : a.skill === "Hunter" ? -0.8 : 0);
+        const bBonus = (b.skill === "Medic" ? -1.2 : b.skill === "Hunter" ? -0.8 : 0);
+        return (a.health + aBonus) - (b.health + bBonus);
       });
-      return active[0]?.id || state.chars[0]?.id;
+      return candidates[0]?.id;
     }
 
-    // ----------------------------
-    // Round Runner
-    // ----------------------------
-    let playerPickId = null;
+    // --- Round control ---
+    function startRound() {
+      if (!state.started) return;
+      if (state.phase === "over") return;
+      if (state.round >= state.maxRounds) return;
 
-    function runRoundStart(){
-      // advance round
       state.round += 1;
+      state.phase = "round_started";
       state.pendingPickId = null;
-      playerPickId = null;
 
       logLine(`<span class="name">— Round ${state.round} begins —</span>`);
 
-      // health tick
+      // health tick first
       applyHealthTick();
-      logLine(`<span class="muted">Health tick applied (based on Independence).</span>`);
 
-      // compute alliances
-      const alliances = computeAlliances();
-      if (alliances.length) {
-        const pretty = alliances.map(([a,b]) => `${state.chars.find(c=>c.id===a).name} ↔ ${state.chars.find(c=>c.id===b).name}`).join(", ");
-        logLine(`<span class="warn">Alliances formed:</span> ${escapeHtml(pretty)}`);
-      } else {
-        logLine(`<span class="muted">No alliances formed this round.</span>`);
-      }
+      // alliances
+      computeAlliances();
 
-      // dialogue in captain-influenced order
-      logLine(`<span class="muted">Discussion (Speaker Captain influences order):</span>`);
-      npcDialogue();
+      // dialogue
+      npcDialoguePhase();
 
-      // enable player pick
+      // now wait for player's water pick
+      state.phase = "awaiting_pick";
       state.pendingPickId = $("waterPick").value;
-      $("confirmPickBtn").disabled = false;
 
-      render();
+      logLine(`<span class="muted"><b>Your decision:</b></span> Choose who receives <b>Water</b>.`);
+
+      renderAll();
     }
 
-    function confirmPick(){
-      if (!state.pendingPickId) return;
-      playerPickId = state.pendingPickId;
+    function confirmWaterPick() {
+      if (state.phase !== "awaiting_pick") return;
+      const pickId = state.pendingPickId || $("waterPick").value;
+      const picked = findChar(pickId);
+      if (!picked || isCollapsed(picked)) {
+        logLine(`<span class="bad"><b>Invalid pick:</b></span> Choose someone active (not collapsed).`);
+        return;
+      }
 
-      const picked = state.chars.find(c=>c.id===playerPickId);
-      logLine(`<span class="name">${escapeHtml(picked.name)}</span> was chosen by <span class="tag">You</span> to receive <b>Water</b>.`);
+      logLine(`<span class="tag">You</span> chose <b>${escapeHtml(picked.name)}</b> to receive <b>Water</b>.`);
 
       // NPC votes
       const votes = npcVotes();
-      // Log a few vote reasons to keep it minimal
+      // log a few vote lines
       const sample = votes.slice(0, 3);
       for (const v of sample) {
-        const voter = state.chars.find(c=>c.id===v.voterId);
+        const voter = findChar(v.voterId);
         logLine(`<span class="small muted">${escapeHtml(voter.name)}:</span> ${escapeHtml(v.reason)}`);
       }
       if (votes.length > sample.length) {
         logLine(`<span class="small muted">(+${votes.length - sample.length} more NPC votes)</span>`);
       }
 
-      // Resolve winner
-      const result = resolveWaterRecipient(playerPickId, votes);
-      const winner = state.chars.find(c=>c.id===result.winnerId);
+      // Resolve
+      const result = resolveVote(pickId, votes);
+      const winner = findChar(result.winnerId);
 
-      // Apply consequence: winner becomes next round’s Speaker Captain
-      state.speakerCaptainId = winner.id;
-
-      // Announce tally (compact)
+      // announce tally compact
       const tallyStr = Array.from(result.tally.entries())
-        .map(([id,n]) => `${state.chars.find(c=>c.id===id).name}:${n}`)
-        .sort((a,b)=> {
-          const na = parseInt(a.split(":").pop(),10);
-          const nb = parseInt(b.split(":").pop(),10);
-          return nb - na;
-        })
+        .map(([id,n]) => `${findChar(id)?.name || "?"}:${n}`)
+        .sort((a,b)=> parseInt(b.split(":").pop(),10) - parseInt(a.split(":").pop(),10))
         .join(" · ");
 
       logLine(`<b>Water recipient (group vote):</b> <span class="name">${escapeHtml(winner.name)}</span> ${result.tied ? `<span class="small warn">(tie-break)</span>` : ""}`);
-      logLine(`<span class="small muted">Tally:</span> <span class="small">${escapeHtml(tallyStr)}</span>`);
+      logLine(`<span class="small muted">Tally:</span> <span class="small mono">${escapeHtml(tallyStr)}</span>`);
+
+      // consequence: speaker captain for NEXT round
+      state.speakerCaptainId = winner.id;
       logLine(`<b>Consequence:</b> ${escapeHtml(winner.name)} becomes <span class="tag">Speaker Captain</span> next round (controls speaking order).`);
 
-      // Update meters + global effects
-      updateMeters(result.winnerId, votes);
+      // update meters + global effects
+      updateMetersAndEffects(winner.id, votes);
 
-      // Check game over
-      const over = isGameOver();
-      if (over.over) {
-        logLine(`<span class="bad"><b>Game Over:</b></span> ${escapeHtml(over.reason)}`);
-        $("nextRoundBtn").disabled = true;
-      } else if (state.round >= state.maxRounds) {
-        logLine(`<span class="good"><b>End:</b></span> You survived ${state.maxRounds} rounds. Review patterns in who gained voice and resources.`);
-        $("nextRoundBtn").disabled = true;
+      // update collapse flags if global health caused new 0s
+      for (const c of state.chars) {
+        if (c.health === 0) c.collapsedUntilRound = Math.max(c.collapsedUntilRound, state.round + 1);
       }
 
-      // clear pending
-      state.pendingPickId = null;
-      playerPickId = null;
-      $("confirmPickBtn").disabled = true;
+      // end / continue
+      const over = gameOverCheck();
+      if (over.over) {
+        state.phase = "over";
+        logLine(`<span class="bad"><b>Game Over:</b></span> ${escapeHtml(over.reason)}`);
+      } else if (state.round >= state.maxRounds) {
+        state.phase = "over";
+        logLine(`<span class="good"><b>End:</b></span> You survived ${state.maxRounds} rounds. Review who gained resources and voice.`);
+      } else {
+        state.phase = "resolved";
+        logLine(`<span class="muted">Click <b>Start Round</b> to continue.</span>`);
+      }
 
-      render();
+      // clear pick
+      state.pendingPickId = null;
+
+      renderAll();
     }
 
-    // ----------------------------
-    // Game Setup / Reset
-    // ----------------------------
-    function setupNewGame(){
+    // --- Setup / Reset ---
+    function newGame() {
       state.started = true;
       state.round = 0;
       state.maxRounds = 8;
       state.community = 6;
       state.selfish = 4;
       state.speakerCaptainId = null;
+      state.phase = "idle";
       state.pendingPickId = null;
-      playerPickId = null;
 
-      // create player + 4 NPCs (minimal)
+      // Create player + 4 NPCs
       const used = new Set();
       function uniqueName(){
         let n;
@@ -658,69 +698,55 @@
       }
 
       state.chars = [
-        newChar({name: "You", isPlayer: true}),
-        newChar({name: uniqueName()}),
-        newChar({name: uniqueName()}),
-        newChar({name: uniqueName()}),
-        newChar({name: uniqueName()}),
+        makeChar({ name: "You", isPlayer: true }),
+        makeChar({ name: uniqueName() }),
+        makeChar({ name: uniqueName() }),
+        makeChar({ name: uniqueName() }),
+        makeChar({ name: uniqueName() }),
       ];
 
       clearLog();
-      logLine(`<span class="name">New Game</span> — You are stranded with 4 NPCs. No one is eliminated; power shifts through voice.`);
-      logLine(`<span class="muted">Click “Run Next Round” to begin.</span>`);
+      logLine(`<span class="name">New Game</span> — You are stranded with 4 NPCs.`);
+      logLine(`<span class="muted">No one is eliminated. Tension increases via <b>Health</b>, <b>alliances</b>, and <b>control of voice</b>.</span>`);
+      logLine(`<span class="muted">Click <b>Start Round</b>.</span>`);
 
-      $("nextRoundBtn").disabled = false;
-      $("confirmPickBtn").disabled = true;
-
-      render();
+      renderAll();
     }
 
-    function resetAll(){
+    function resetAll() {
       state.started = false;
       state.round = 0;
       state.community = 0;
       state.selfish = 0;
       state.speakerCaptainId = null;
       state.chars = [];
+      state.phase = "idle";
       state.pendingPickId = null;
-      playerPickId = null;
-
       clearLog();
-      render();
+      renderAll();
     }
 
-    // ----------------------------
-    // Wiring
-    // ----------------------------
-    $("newGameBtn").onclick = setupNewGame;
-
-    $("nextRoundBtn").onclick = () => {
-      const over = isGameOver();
-      if (over.over) return;
-      if (!state.started) return;
-      if (state.round >= state.maxRounds) return;
-      runRoundStart();
-    };
+    // --- Wire UI ---
+    $("newGameBtn").onclick = newGame;
+    $("startRoundBtn").onclick = startRound;
+    $("confirmPickBtn").onclick = confirmWaterPick;
+    $("resetBtn").onclick = resetAll;
 
     $("waterPick").addEventListener("change", () => {
       state.pendingPickId = $("waterPick").value;
-      $("confirmPickBtn").disabled = !state.started || state.round === 0 || !state.pendingPickId;
+      renderTop();
     });
 
-    $("confirmPickBtn").onclick = confirmPick;
-
-    $("autoPickBtn").onclick = () => {
-      if (!state.started || state.round === 0) return;
-      const id = suggestPick();
+    $("suggestBtn").onclick = () => {
+      if (!state.started || state.phase !== "awaiting_pick") return;
+      const id = suggestPickId();
       if (!id) return;
       $("waterPick").value = id;
       state.pendingPickId = id;
-      $("confirmPickBtn").disabled = false;
-      const c = state.chars.find(x=>x.id===id);
-      logLine(`<span class="muted small">Suggestion:</span> Consider giving Water to <b>${escapeHtml(c.name)}</b> (lowest need/skill heuristic).`);
+      const c = findChar(id);
+      logLine(`<span class="small muted">Suggestion:</span> Consider giving Water to <b>${escapeHtml(c.name)}</b> (need + utility heuristic).`);
+      renderAll();
     };
-
-    $("resetBtn").onclick = resetAll;
 
     // initial
     resetAll();
