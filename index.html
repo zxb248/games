@@ -3,832 +3,727 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Island Council (Digital Prototype) — Option B</title>
+  <title>Island Council — Solo Prototype</title>
   <style>
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 0; background: #0b1020; color: #e7eaf3; }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    body { margin:0; background:#0b1020; color:#e7eaf3; }
+    .wrap { max-width: 1050px; margin: 0 auto; padding: 20px; }
     h1 { margin: 0 0 8px; font-size: 22px; }
-    .sub { opacity: .8; margin: 0 0 18px; }
-    .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
-    @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
-    .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 16px; }
-    label { display:block; font-size: 13px; opacity: .9; margin: 8px 0 6px; }
-    input, textarea, select, button {
+    .sub { opacity:.8; margin:0 0 14px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 920px){ .grid{ grid-template-columns:1fr; } }
+    .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 14px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    .row > * { flex: 1; }
+    label { display:block; font-size: 13px; opacity:.9; margin: 8px 0 6px; }
+    input, select, textarea, button {
       width: 100%; box-sizing: border-box;
       border-radius: 10px; border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.25); color: #e7eaf3;
       padding: 10px 12px; font-size: 14px;
     }
-    textarea { min-height: 58px; resize: vertical; }
-    button { cursor: pointer; background: rgba(255,255,255,.10); }
-    button.primary { background: rgba(80, 180, 255, .22); border-color: rgba(80,180,255,.35); }
-    button.danger { background: rgba(255, 90, 120, .18); border-color: rgba(255,90,120,.30); }
-    .row { display:flex; gap: 10px; align-items:center; }
-    .row > * { flex: 1; }
-    .muted { opacity: .75; font-size: 13px; }
-    .pill { display:inline-flex; align-items:center; gap: 8px; padding: 6px 10px; border-radius: 999px;
+    button { cursor:pointer; background: rgba(255,255,255,.10); }
+    button.primary { background: rgba(80,180,255,.22); border-color: rgba(80,180,255,.35); }
+    button.danger { background: rgba(255,90,120,.18); border-color: rgba(255,90,120,.30); }
+    .pill { display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px;
       background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); font-size: 13px; }
-    .players { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .playerTag { display:flex; gap: 8px; align-items:center; padding: 8px 10px; border-radius: 12px;
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); }
-    .playerTag b { font-weight: 600; }
-    .tinyBtn { width: auto; padding: 6px 10px; font-size: 12px; border-radius: 10px; }
-    .hr { height: 1px; background: rgba(255,255,255,.10); margin: 14px 0; }
+    .muted { opacity:.75; font-size: 13px; }
+    .hr { height:1px; background: rgba(255,255,255,.10); margin: 12px 0; }
     table { width:100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align:left; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.10); vertical-align: top;}
-    th { opacity: .8; font-weight: 600; }
-    .kv { display:grid; grid-template-columns: 180px 1fr; gap: 8px; font-size: 13px; }
-    .kv div { padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,.12); }
-    .kv div:nth-child(odd){ opacity:.8; }
-    .hidden { display:none !important; }
-    .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.16); padding: 10px 14px; border-radius: 12px;
-      font-size: 13px; opacity: 0; pointer-events:none; transition: opacity .2s ease; }
-    .toast.show { opacity: 1; }
-    .sectionTitle { margin: 0 0 8px; font-size: 14px; }
-    .orderList { display:flex; flex-wrap:wrap; gap: 8px; margin-top: 8px; }
-    .orderItem {
-      display:flex; align-items:center; gap:8px;
-      padding: 8px 10px; border-radius: 12px;
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10);
-    }
-    .orderItem .name { font-weight: 600; }
-    .badge {
-      display:inline-flex; align-items:center; padding: 2px 8px; border-radius: 999px;
-      background: rgba(80, 180, 255, .18); border: 1px solid rgba(80,180,255,.28);
-      font-size: 12px;
-    }
+    th, td { text-align:left; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.10); vertical-align: top; }
+    th { opacity:.8; font-weight: 600; }
+    .tag { display:inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px;
+      background: rgba(80,180,255,.18); border: 1px solid rgba(80,180,255,.28); }
+    .tag2 { display:inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 12px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
+    .log { max-height: 320px; overflow:auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); }
+    .log .line { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .log .line:last-child { border-bottom: none; }
+    .name { font-weight: 700; }
+    .small { font-size: 12px; opacity:.85; }
+    .good { color: #a8ffb5; }
+    .bad { color: #ff9fb2; }
+    .warn { color: #ffd38a; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Island Council — Digital Prototype (Option B)</h1>
+    <h1>Island Council — Solo Prototype</h1>
     <p class="sub">
-      One decision · one constraint · one consequence (no elimination).
-      <span class="pill" id="phasePill">Phase: Setup</span>
+      You play alone. The computer simulates NPCs (dialogue, alliances, votes).
       <span class="pill" id="roundPill">Round: —</span>
-      <span class="pill" id="timerPill">Timer: Off</span>
+      <span class="pill" id="captainPill">Speaker Captain: —</span>
     </p>
 
     <div class="grid">
-      <!-- LEFT: Setup / Game Controls -->
       <div class="card">
-        <h2 style="margin:0 0 10px; font-size:16px;">Setup</h2>
-        <div class="muted">
-          Add players, then start. This is a single-device prototype (facilitator runs it).
-        </div>
-
-        <label>Add player</label>
         <div class="row">
-          <input id="playerName" placeholder="Name (e.g., Alex)" autocomplete="off" />
-          <button class="primary" id="addPlayerBtn">Add</button>
-        </div>
-
-        <div class="players" id="playersList"></div>
-
-        <div class="hr"></div>
-
-        <label>Rounds</label>
-        <input id="roundCount" type="number" min="1" max="10" value="4" />
-
-        <label>Timer per voting phase (seconds)</label>
-        <div class="row">
-          <input id="timerSeconds" type="number" min="0" max="600" value="60" />
-          <button id="toggleTimerBtn">Enable Timer</button>
-        </div>
-
-        <div class="row" style="margin-top:10px;">
-          <button class="primary" id="startGameBtn">Start Game</button>
+          <button class="primary" id="newGameBtn">New Game</button>
+          <button id="nextRoundBtn" class="primary" disabled>Run Next Round</button>
           <button class="danger" id="resetBtn">Reset</button>
         </div>
 
         <div class="hr"></div>
 
-        <h2 style="margin:0 0 10px; font-size:16px;">Your Rule (Minimal)</h2>
-        <div class="kv">
-          <div><b>Decision</b></div><div>Vote for <b>one person</b> to receive the scarce resource (Water).</div>
-          <div><b>Constraint</b></div><div>Only <b>one</b> person can receive it each round.</div>
-          <div><b>Consequence</b></div><div>The Water recipient becomes <b>Speaker Captain</b> next round (controls speaking order).</div>
+        <div class="row">
+          <span class="pill">Community: <b id="communityScore">—</b>/10</span>
+          <span class="pill">Selfish: <b id="selfishScore">—</b>/10</span>
+          <span class="pill">Your Health: <b id="yourHealth">—</b>/10</span>
         </div>
 
         <div class="hr"></div>
 
-        <h3 class="sectionTitle">How Speaker Captain Works</h3>
+        <h3 style="margin:0 0 8px; font-size:15px;">Your Choice (one decision)</h3>
         <div class="muted">
-          In the next round, the Speaker Captain sets the order. Use it as a facilitation rule:
-          each person gets 10 seconds, in the captain’s chosen order. (Optional: captain may skip one person.)
+          Each round you choose who receives <b>Water</b>. Only one person can receive it.
+          The Water recipient becomes <b>Speaker Captain</b> next round (controls speaking order).
+        </div>
+
+        <label style="margin-top:10px;">Pick Water recipient</label>
+        <select id="waterPick"></select>
+
+        <div class="row" style="margin-top:10px;">
+          <button id="confirmPickBtn" class="primary" disabled>Confirm Water Pick</button>
+          <button id="autoPickBtn">Suggest Pick</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="muted small">
+          <b>Stats:</b> Health (0–10), Independence (0–2), Selfish Index (0–2), Alliance Need (0–2), Skill (1 of 4).
+          <br/>
+          <b>Health tick:</b> Indep 0 = -2, Indep 1 = -1, Indep 2 = 0 each round.
         </div>
       </div>
 
-      <!-- RIGHT: Live Game Panel -->
       <div class="card">
-        <h2 style="margin:0 0 10px; font-size:16px;">Live Game</h2>
+        <h3 style="margin:0 0 8px; font-size:15px;">Characters</h3>
+        <div class="muted">No one is eliminated. When Health hits 0, they “collapse” and can’t speak/vote for 1 round.</div>
+        <div class="hr"></div>
 
-        <div id="gameNotStarted" class="muted">
-          Add at least 3 players, then click <b>Start Game</b>.
-        </div>
+        <table id="charsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Health</th>
+              <th>Indep</th>
+              <th>Selfish</th>
+              <th>Alliance</th>
+              <th>Skill</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-        <div id="gameStarted" class="hidden">
-          <div class="row">
-            <button id="beginVotingBtn" class="primary">Begin Voting</button>
-            <button id="endVotingBtn" class="hidden">End Voting</button>
-          </div>
-
-          <div class="hr"></div>
-
-          <div id="speakerCaptainBox" class="muted"></div>
-
-          <div class="hr"></div>
-
-          <label>Cast Vote (secret)</label>
-          <div class="row">
-            <select id="voterSelect"></select>
-            <button id="markVotedBtn">Mark Vote Cast</button>
-          </div>
-
-          <label>Vote for (Water recipient)</label>
-          <select id="voteForSelect"></select>
-
-          <label>Reason (optional; helpful for debrief)</label>
-          <textarea id="reasonInput" placeholder="I voted ___ because ___"></textarea>
-
-          <button id="submitVoteBtn" class="primary" style="margin-top:10px;">Submit Vote</button>
-
-          <div class="hr"></div>
-
-          <div class="row">
-            <div class="pill" id="votesCountPill">Votes: 0</div>
-            <div class="pill" id="votedPlayersPill">Voted: 0/0</div>
-          </div>
-
-          <div class="hr"></div>
-
-          <button id="revealResultBtn" class="primary">Reveal Round Result</button>
-          <button id="nextRoundBtn" class="hidden">Next Round</button>
-
-          <div id="resultBox" class="hidden" style="margin-top:12px;">
-            <h3 style="margin:0 0 8px; font-size:14px;">Round Result</h3>
-            <div class="kv">
-              <div><b>Water Recipient</b></div><div id="winnerLine">—</div>
-              <div><b>Next Round Power</b></div><div id="powerLine">—</div>
-              <div><b>Notes</b></div><div id="notesLine" class="muted">—</div>
-            </div>
-
-            <div class="hr"></div>
-
-            <h3 class="sectionTitle">Set Speaking Order (for next round)</h3>
-            <div class="muted">Drag-and-drop isn’t included in this simple prototype — use the buttons to build the order.</div>
-
-            <label style="margin-top:10px;">Add to order</label>
-            <div class="row">
-              <select id="orderAddSelect"></select>
-              <button id="orderAddBtn">Add</button>
-            </div>
-
-            <div class="row" style="margin-top:8px;">
-              <button id="orderClearBtn">Clear Order</button>
-              <button id="orderAutoBtn" class="primary">Auto (Captain First)</button>
-            </div>
-
-            <div class="orderList" id="orderList"></div>
-
-            <div class="row" style="margin-top:10px;">
-              <button id="orderFinalizeBtn" class="primary">Finalize Order</button>
-            </div>
-
-            <div id="orderFinalNote" class="muted" style="margin-top:8px;"></div>
-          </div>
-
-          <div class="hr"></div>
-
-          <h3 style="margin:0 0 8px; font-size:14px;">Round History</h3>
-          <div style="max-height:260px; overflow:auto;">
-            <table id="historyTable">
-              <thead>
-                <tr>
-                  <th>Round</th>
-                  <th>Water Recipient</th>
-                  <th>Speaker Captain Next Round</th>
-                  <th>Speaking Order (next round)</th>
-                  <th>Reasons (sample)</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-        </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <h3 style="margin:0 0 8px; font-size:15px;">Round Log</h3>
+        <div class="log" id="log"></div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
   <script>
-    // ---------------------------
-    // State
-    // ---------------------------
+    // ----------------------------
+    // Minimal Solo Game Engine
+    // ----------------------------
+    const SKILLS = ["Builder", "Medic", "Hunter", "Navigator"];
+
+    const NAMES = ["Jordan","Avery","Sam","Taylor","Casey","Riley","Morgan","Quinn","Cameron","Drew","Alex","Jamie"];
+
+    function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    // Dialogue templates: simple + effective (no external AI).
+    const DIALOGUE = {
+      2: [ // selfish
+        "I’m not giving water away without a return.",
+        "We need strength, not sympathy.",
+        "If we keep saving the weak, we all go down.",
+        "I’m watching who’s useful. That’s the only logic."
+      ],
+      1: [ // mixed
+        "I get both sides—who helps us tomorrow?",
+        "I’ll support the choice that improves our odds.",
+        "We need a plan, not just feelings.",
+        "Convince me this isn’t a mistake."
+      ],
+      0: [ // community
+        "If we ignore the vulnerable, we lose our humanity.",
+        "We should protect whoever is in real danger.",
+        "Let’s choose what keeps the group together.",
+        "Care is strategy. It keeps us alive."
+      ]
+    };
+
     const state = {
       started: false,
       round: 0,
-      totalRounds: 4,
-      phase: "setup", // setup | voting | revealed | ended
-      players: [], // { id, name }
-      // Speaker Captain is determined by last round's Water recipient:
-      speakerCaptainNextRoundFor: null, // playerId
-      // speakingOrderForCurrentRound is what we apply THIS round (set last round)
-      speakingOrderForCurrentRound: [], // array of playerIds (order)
-      currentRoundVotes: [], // { voterId, targetId, reason }
-      hasVoted: new Set(),
-      timerEnabled: false,
-      timerSeconds: 60,
-      timerRemaining: 0,
-      timerHandle: null,
-      history: [] // { round, waterWinnerId, speakerCaptainForNextRoundId, speakingOrderNextRound: [...], reasons: [...], tally:[...] }
+      maxRounds: 8,
+      community: 6,
+      selfish: 4,
+      speakerCaptainId: null, // affects speaking order
+      chars: [], // includes player + NPCs
+      pendingPickId: null,
     };
 
-    // ---------------------------
-    // Helpers
-    // ---------------------------
+    // Character model:
+    // { id, name, isPlayer, health, indep, selfish, allianceNeed, skill, collapsedUntilRound, allyIdLastRound, helpedLastRoundBy }
+
+    function newChar({name, isPlayer=false}) {
+      return {
+        id: crypto.randomUUID(),
+        name,
+        isPlayer,
+        health: isPlayer ? 8 : randInt(5, 10),
+        indep: isPlayer ? 1 : randInt(0, 2),
+        selfish: isPlayer ? 1 : randInt(0, 2),
+        allianceNeed: isPlayer ? 1 : randInt(0, 2),
+        skill: pick(SKILLS),
+        collapsedUntilRound: 0, // if > current round, can't act
+        allyIdLastRound: null,
+        helpedLastRoundBy: null,
+      };
+    }
+
+    // UI helpers
     const $ = (id) => document.getElementById(id);
 
-    function uid() {
-      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    function logLine(html){
+      const log = $("log");
+      const div = document.createElement("div");
+      div.className = "line";
+      div.innerHTML = html;
+      log.prepend(div);
     }
 
-    function toast(msg) {
-      const el = $("toast");
-      el.textContent = msg;
-      el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 1600);
+    function clearLog(){ $("log").innerHTML = ""; }
+
+    function render() {
+      $("roundPill").textContent = state.started ? `Round: ${state.round}/${state.maxRounds}` : "Round: —";
+      $("communityScore").textContent = state.started ? state.community : "—";
+      $("selfishScore").textContent = state.started ? state.selfish : "—";
+
+      const player = state.chars.find(c => c.isPlayer);
+      $("yourHealth").textContent = state.started ? player.health : "—";
+
+      const captainName = state.speakerCaptainId ? state.chars.find(c=>c.id===state.speakerCaptainId)?.name : "—";
+      $("captainPill").textContent = `Speaker Captain: ${captainName || "—"}`;
+
+      // Table
+      const tbody = $("charsTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      for (const c of state.chars) {
+        const isCollapsed = state.round < c.collapsedUntilRound;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <span class="name">${escapeHtml(c.name)}</span>
+            ${c.isPlayer ? ' <span class="tag">You</span>' : ''}
+          </td>
+          <td>${c.health}</td>
+          <td>${c.indep}</td>
+          <td>${c.selfish}</td>
+          <td>${c.allianceNeed}</td>
+          <td><span class="tag2">${escapeHtml(c.skill)}</span></td>
+          <td>${isCollapsed ? '<span class="bad">Collapsed</span>' : '<span class="good">Active</span>'}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // Water pick dropdown
+      const sel = $("waterPick");
+      sel.innerHTML = "";
+      for (const c of state.chars) {
+        const isCollapsed = state.round < c.collapsedUntilRound;
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = `${c.name}${c.isPlayer ? " (You)" : ""}${isCollapsed ? " [Collapsed]" : ""} — H:${c.health} I:${c.indep} S:${c.selfish} Skill:${c.skill}`;
+        sel.appendChild(opt);
+      }
+
+      $("nextRoundBtn").disabled = !state.started || state.round >= state.maxRounds || isGameOver().over;
+      $("confirmPickBtn").disabled = !state.started || state.round === 0 || state.pendingPickId == null || isGameOver().over;
     }
 
-    function setPhase(phase) {
-      state.phase = phase;
-      $("phasePill").textContent = `Phase: ${phase[0].toUpperCase() + phase.slice(1)}`;
-      renderSpeakerCaptainBox();
-    }
-
-    function setRound(n) {
-      state.round = n;
-      $("roundPill").textContent = n > 0 ? `Round: ${n}/${state.totalRounds}` : `Round: —`;
-      renderSpeakerCaptainBox();
-    }
-
-    function updateTimerPill() {
-      if (!state.timerEnabled) $("timerPill").textContent = "Timer: Off";
-      else $("timerPill").textContent = `Timer: ${state.timerRemaining}s`;
-    }
-
-    function startTimer(seconds) {
-      stopTimer();
-      state.timerEnabled = true;
-      state.timerRemaining = seconds;
-      updateTimerPill();
-      state.timerHandle = setInterval(() => {
-        state.timerRemaining -= 1;
-        updateTimerPill();
-        if (state.timerRemaining <= 0) {
-          stopTimer();
-          toast("Time!");
-          if (state.phase === "voting") endVoting();
-        }
-      }, 1000);
-    }
-
-    function stopTimer() {
-      if (state.timerHandle) clearInterval(state.timerHandle);
-      state.timerHandle = null;
-      if (state.timerEnabled) state.timerRemaining = 0;
-      updateTimerPill();
-    }
-
-    function escapeHtml(str) {
+    function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, s => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[s]));
     }
 
-    function playerName(id) {
-      return state.players.find(p => p.id === id)?.name || "Unknown";
+    function isGameOver(){
+      if (!state.started) return { over:false, reason:"" };
+      const player = state.chars.find(c=>c.isPlayer);
+      if (player.health <= 0) return { over:true, reason:"You collapsed (Health reached 0)." };
+      if (state.community <= 0) return { over:true, reason:"Community collapsed (Community score reached 0)." };
+      if (state.selfish >= 10 && state.community <= 2) return { over:true, reason:"The group fragmented (Selfish dominated)." };
+      return { over:false, reason:"" };
     }
 
-    function clampInt(v, min, max) {
-      const n = parseInt(v, 10);
-      if (Number.isNaN(n)) return min;
-      return Math.max(min, Math.min(max, n));
-    }
+    // ----------------------------
+    // Core Mechanics
+    // ----------------------------
 
-    // ---------------------------
-    // Rendering
-    // ---------------------------
-    function renderPlayers() {
-      const wrap = $("playersList");
-      wrap.innerHTML = "";
-      state.players.forEach(p => {
-        const tag = document.createElement("div");
-        tag.className = "playerTag";
-        tag.innerHTML = `<b>${escapeHtml(p.name)}</b><span class="muted">(${p.id.slice(0,6)})</span>`;
-        const btn = document.createElement("button");
-        btn.className = "tinyBtn";
-        btn.textContent = "Remove";
-        btn.onclick = () => {
-          if (state.started) return toast("Can't remove players after starting.");
-          state.players = state.players.filter(x => x.id !== p.id);
-          renderPlayers();
-          renderSelects();
-        };
-        tag.appendChild(btn);
-        wrap.appendChild(tag);
-      });
-      renderSelects();
-    }
-
-    function renderSelects() {
-      const voter = $("voterSelect");
-      const target = $("voteForSelect");
-      const orderAdd = $("orderAddSelect");
-      voter.innerHTML = "";
-      target.innerHTML = "";
-      orderAdd.innerHTML = "";
-
-      state.players.forEach(p => {
-        const o1 = document.createElement("option");
-        o1.value = p.id;
-        o1.textContent = p.name;
-        voter.appendChild(o1);
-
-        const o2 = document.createElement("option");
-        o2.value = p.id;
-        o2.textContent = p.name;
-        target.appendChild(o2);
-
-        const o3 = document.createElement("option");
-        o3.value = p.id;
-        o3.textContent = p.name;
-        orderAdd.appendChild(o3);
-      });
-
-      updateVotePills();
-      renderOrderList();
-      renderSpeakerCaptainBox();
-    }
-
-    function updateVotePills() {
-      $("votesCountPill").textContent = `Votes: ${state.currentRoundVotes.length}`;
-      $("votedPlayersPill").textContent = `Voted: ${state.hasVoted.size}/${state.players.length}`;
-    }
-
-    function renderOrderList() {
-      const list = $("orderList");
-      if (!list) return;
-      list.innerHTML = "";
-      const order = state.pendingSpeakingOrderNextRound || [];
-      order.forEach((pid, idx) => {
-        const item = document.createElement("div");
-        item.className = "orderItem";
-        item.innerHTML = `<span class="muted">#${idx + 1}</span> <span class="name">${escapeHtml(playerName(pid))}</span>`;
-
-        const up = document.createElement("button");
-        up.className = "tinyBtn";
-        up.textContent = "↑";
-        up.onclick = () => moveOrder(pid, -1);
-
-        const down = document.createElement("button");
-        down.className = "tinyBtn";
-        down.textContent = "↓";
-        down.onclick = () => moveOrder(pid, +1);
-
-        const rm = document.createElement("button");
-        rm.className = "tinyBtn";
-        rm.textContent = "Remove";
-        rm.onclick = () => removeFromOrder(pid);
-
-        item.appendChild(up);
-        item.appendChild(down);
-        item.appendChild(rm);
-        list.appendChild(item);
-      });
-    }
-
-    function renderSpeakerCaptainBox() {
-      const box = $("speakerCaptainBox");
-      if (!box) return;
-
-      const captainForThisRound = state.speakingOrderForCurrentRound?.length
-        ? (state.speakerCaptainForThisRoundId || null)
-        : state.speakerCaptainForThisRoundId || null;
-
-      // Determine captain for THIS round: it is last round’s water winner
-      // We store it as speakerCaptainForThisRoundId when advancing rounds.
-      if (!state.started || state.round === 0) {
-        box.innerHTML = `Speaker Captain: <span class="muted">—</span>`;
-        return;
-      }
-
-      const captainId = state.speakerCaptainForThisRoundId || null;
-
-      if (!captainId) {
-        box.innerHTML = `Speaker Captain (this round): <span class="muted">None yet (Round 1 has no captain until after voting)</span>`;
-        return;
-      }
-
-      const order = state.speakingOrderForCurrentRound || [];
-      if (!order.length) {
-        box.innerHTML = `Speaker Captain (this round): <span class="badge">${escapeHtml(playerName(captainId))}</span> — <span class="muted">No order set (use last round’s result panel next time).</span>`;
-        return;
-      }
-
-      box.innerHTML = `
-        Speaker Captain (this round): <span class="badge">${escapeHtml(playerName(captainId))}</span><br/>
-        <span class="muted">Speaking order:</span> ${order.map(pid => escapeHtml(playerName(pid))).join(" → ")}
-      `;
-    }
-
-    function renderHistory() {
-      const tbody = $("historyTable").querySelector("tbody");
-      tbody.innerHTML = "";
-
-      for (const h of state.history) {
-        const waterName = playerName(h.waterWinnerId);
-        const capName = playerName(h.speakerCaptainForNextRoundId);
-
-        const orderStr = (h.speakingOrderNextRound && h.speakingOrderNextRound.length)
-          ? h.speakingOrderNextRound.map(pid => playerName(pid)).join(" → ")
-          : "—";
-
-        const sampleReasons = (h.reasons || []).slice(0, 2);
-        const reasonsStr = sampleReasons.length
-          ? sampleReasons.map(r => `“${escapeHtml(r)}”`).join("<br/>")
-          : `<span class="muted">—</span>`;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><b>${h.round}</b></td>
-          <td>${escapeHtml(waterName)}</td>
-          <td>${escapeHtml(capName)}</td>
-          <td>${escapeHtml(orderStr)}</td>
-          <td>${reasonsStr}</td>
-        `;
-        tbody.appendChild(tr);
+    // Health tick based on independence
+    function applyHealthTick(){
+      for (const c of state.chars) {
+        if (state.round < c.collapsedUntilRound) continue; // already collapsed, skip tick this round
+        const loss = (c.indep === 0) ? 2 : (c.indep === 1 ? 1 : 0);
+        c.health = clamp(c.health - loss, 0, 10);
+        if (c.health === 0) {
+          c.collapsedUntilRound = state.round + 1; // can't act next round
+        }
       }
     }
 
-    // ---------------------------
-    // Order editing (next round)
-    // ---------------------------
-    function ensurePendingOrder() {
-      if (!state.pendingSpeakingOrderNextRound) state.pendingSpeakingOrderNextRound = [];
-    }
+    // Choose alliances for NPCs (simple)
+    function computeAlliances(){
+      // reset
+      for (const c of state.chars) if (!c.isPlayer) c.allyIdLastRound = null;
 
-    function addToOrder(pid) {
-      ensurePendingOrder();
-      if (state.pendingSpeakingOrderNextRound.includes(pid)) return toast("Already in order.");
-      state.pendingSpeakingOrderNextRound.push(pid);
-      renderOrderList();
-    }
+      // Each NPC picks one ally candidate (or null)
+      const picks = new Map(); // npcId -> allyId
+      const candidates = state.chars.map(c=>c.id);
 
-    function removeFromOrder(pid) {
-      ensurePendingOrder();
-      state.pendingSpeakingOrderNextRound = state.pendingSpeakingOrderNextRound.filter(x => x !== pid);
-      renderOrderList();
-    }
+      for (const npc of state.chars.filter(c=>!c.isPlayer)) {
+        if (state.round < npc.collapsedUntilRound) continue;
 
-    function moveOrder(pid, delta) {
-      ensurePendingOrder();
-      const arr = state.pendingSpeakingOrderNextRound;
-      const i = arr.indexOf(pid);
-      if (i < 0) return;
-      const j = i + delta;
-      if (j < 0 || j >= arr.length) return;
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-      renderOrderList();
-    }
+        // Alliance desire increases when low health or high allianceNeed
+        const desire = npc.allianceNeed + (npc.health <= 4 ? 1 : 0);
+        if (desire <= 0) continue;
 
-    function clearOrder() {
-      state.pendingSpeakingOrderNextRound = [];
-      renderOrderList();
-      $("orderFinalNote").textContent = "";
-    }
+        // Pick ally by "safety + usefulness + similarity"
+        let best = null, bestScore = -1e9;
+        for (const cid of candidates) {
+          if (cid === npc.id) continue;
+          const other = state.chars.find(x=>x.id===cid);
+          if (state.round < other.collapsedUntilRound) continue;
 
-    function autoOrderCaptainFirst(captainId) {
-      ensurePendingOrder();
-      const others = state.players.map(p => p.id).filter(id => id !== captainId);
-      state.pendingSpeakingOrderNextRound = [captainId, ...others];
-      renderOrderList();
-      $("orderFinalNote").textContent = "Auto order set (Captain first). You can reorder with ↑ ↓.";
-    }
+          let s = 0;
+          // usefulness: skills that help group are valued more by community-ish NPCs
+          const groupValue = (other.skill === "Medic" ? 2 : (other.skill === "Hunter" ? 2 : 1));
+          s += groupValue * (npc.selfish === 0 ? 2 : 1);
 
-    function finalizeOrderForNextRound(captainId) {
-      ensurePendingOrder();
-      // If order is empty, default to captain first + everyone else
-      if (!state.pendingSpeakingOrderNextRound.length) autoOrderCaptainFirst(captainId);
+          // safety: prefer healthier allies if selfish, prefer vulnerable if community
+          s += (npc.selfish === 2 ? other.health : (10 - other.health)) * 0.2;
 
-      // Ensure all players appear exactly once
-      const unique = [];
-      for (const id of state.pendingSpeakingOrderNextRound) {
-        if (!unique.includes(id)) unique.push(id);
+          // similarity helps alliances form
+          s += (other.selfish === npc.selfish ? 1 : 0);
+          s += (other.indep === npc.indep ? 0.5 : 0);
+
+          // reciprocity: if other helped them last round, big boost
+          s += (npc.helpedLastRoundBy === other.id ? 3 : 0);
+
+          // selfish NPCs avoid empowering "too strong" competitors
+          if (npc.selfish === 2 && other.health >= 8) s -= 1;
+
+          if (s > bestScore) { bestScore = s; best = other.id; }
+        }
+        if (best) picks.set(npc.id, best);
       }
-      for (const p of state.players) {
-        if (!unique.includes(p.id)) unique.push(p.id);
+
+      // Alliances are mutual picks
+      const alliances = [];
+      for (const [a, b] of picks.entries()) {
+        if (picks.get(b) === a) {
+          alliances.push([a,b]);
+        }
       }
-      state.pendingSpeakingOrderNextRound = unique;
+      // Store
+      for (const [a,b] of alliances) {
+        const A = state.chars.find(x=>x.id===a);
+        const B = state.chars.find(x=>x.id===b);
+        if (A) A.allyIdLastRound = b;
+        if (B) B.allyIdLastRound = a;
+      }
 
-      // Save into last history entry (speaking order for NEXT round)
-      const last = state.history[state.history.length - 1];
-      if (last) last.speakingOrderNextRound = [...state.pendingSpeakingOrderNextRound];
-
-      $("orderFinalNote").textContent = "Finalized. Use this speaking order at the start of the next round.";
-      renderHistory();
-      toast("Speaking order saved.");
+      return alliances;
     }
 
-    // ---------------------------
-    // Core game logic
-    // ---------------------------
-    function resetRoundState() {
-      state.currentRoundVotes = [];
-      state.hasVoted = new Set();
-      $("reasonInput").value = "";
-      $("resultBox").classList.add("hidden");
-      $("revealResultBtn").classList.remove("hidden");
-      $("nextRoundBtn").classList.add("hidden");
-      $("endVotingBtn").classList.add("hidden");
-      $("beginVotingBtn").classList.remove("hidden");
-      state.pendingSpeakingOrderNextRound = [];
-      $("orderFinalNote").textContent = "";
-      updateVotePills();
-      renderOrderList();
+    // NPC dialogue: 1 line each, ordered by Speaker Captain effect
+    function npcDialogue(){
+      const order = speakingOrderForThisRound();
+      for (const cid of order) {
+        const c = state.chars.find(x=>x.id===cid);
+        if (!c || c.isPlayer) continue;
+        if (state.round < c.collapsedUntilRound) {
+          logLine(`<span class="name">${escapeHtml(c.name)}</span>: <span class="muted">(...collapsed, no comment)</span>`);
+          continue;
+        }
+        const base = pick(DIALOGUE[c.selfish]);
+        const add = dialogueAddon(c);
+        logLine(`<span class="name">${escapeHtml(c.name)}</span>: “${escapeHtml(base)}${add}”`);
+      }
     }
 
-    function startGame() {
-      if (state.players.length < 3) return toast("Add at least 3 players.");
-      state.totalRounds = clampInt($("roundCount").value, 1, 10);
-      state.timerSeconds = clampInt($("timerSeconds").value, 0, 600);
-
-      state.started = true;
-      $("gameNotStarted").classList.add("hidden");
-      $("gameStarted").classList.remove("hidden");
-
-      // Round 1 has NO speaker captain yet (set after Round 1 vote)
-      state.speakerCaptainForThisRoundId = null;
-      state.speakingOrderForCurrentRound = [];
-
-      setRound(1);
-      setPhase("setup");
-      state.speakerCaptainNextRoundFor = null;
-      state.history = [];
-      resetRoundState();
-      renderHistory();
-      renderSpeakerCaptainBox();
-
-      toast("Game started.");
+    function dialogueAddon(c){
+      // Add tiny context to make it feel responsive
+      if (c.health <= 3) return ` <span class="small warn">(My health is low.)</span>`;
+      if (c.allyIdLastRound) return ` <span class="small">(I’m with ${escapeHtml(state.chars.find(x=>x.id===c.allyIdLastRound)?.name || "someone")}.)</span>`;
+      return "";
     }
 
-    function beginVoting() {
-      if (!state.started) return;
-      if (state.phase === "voting") return;
+    // Speaker Captain controls speaking order NEXT round; in solo, we simulate order:
+    // Captain first, then captain's ally (if any), then others, then the player's line last (you decide).
+    function speakingOrderForThisRound(){
+      const ids = state.chars.map(c=>c.id);
+      const captainId = state.speakerCaptainId;
+      if (!captainId) return ids; // round 1: free-for-all
 
-      setPhase("voting");
-      $("beginVotingBtn").classList.add("hidden");
-      $("endVotingBtn").classList.remove("hidden");
-      $("resultBox").classList.add("hidden");
+      const captain = state.chars.find(c=>c.id===captainId);
+      const ally = captain?.allyIdLastRound || null;
 
-      if (state.timerEnabled && state.timerSeconds > 0) startTimer(state.timerSeconds);
-      toast("Voting started.");
+      const rest = ids.filter(id => id !== captainId && id !== ally);
+      // Put player near the end to increase "voice pressure"
+      const playerId = state.chars.find(c=>c.isPlayer)?.id;
+      const restNoPlayer = rest.filter(id => id !== playerId);
+      const withPlayerLast = playerId ? [...restNoPlayer, playerId] : restNoPlayer;
+
+      const order = [captainId];
+      if (ally) order.push(ally);
+      order.push(...withPlayerLast.filter(Boolean));
+      return order;
     }
 
-    function endVoting() {
-      if (state.phase !== "voting") return;
-      setPhase("setup");
-      $("endVotingBtn").classList.add("hidden");
-      $("beginVotingBtn").classList.remove("hidden");
-      stopTimer();
-      toast("Voting ended.");
+    // NPC voting for water recipient
+    function npcVotes(){
+      const votes = []; // { voterId, targetId, reason }
+      const candidates = state.chars.map(c=>c.id);
+
+      for (const npc of state.chars.filter(c=>!c.isPlayer)) {
+        if (state.round < npc.collapsedUntilRound) continue;
+
+        let best = null, bestScore = -1e9, bestReason = "";
+        for (const cid of candidates) {
+          const target = state.chars.find(x=>x.id===cid);
+          if (!target) continue;
+          if (state.round < target.collapsedUntilRound) continue; // don't vote for collapsed
+
+          const {score, reason} = scoreVote(npc, target);
+          if (score > bestScore) { bestScore = score; best = cid; bestReason = reason; }
+        }
+        if (best) votes.push({ voterId: npc.id, targetId: best, reason: bestReason });
+      }
+      return votes;
     }
 
-    function submitVote() {
-      if (state.phase !== "voting") return toast("Click Begin Voting first.");
-      const voterId = $("voterSelect").value;
-      const targetId = $("voteForSelect").value;
-      const reason = $("reasonInput").value.trim();
+    function scoreVote(voter, target){
+      // Minimal but dynamic scoring
+      let score = 0;
+      const need = (10 - target.health); // higher need when low health
+      const groupSkillValue = (target.skill === "Medic" ? 3 : (target.skill === "Hunter" ? 3 : (target.skill === "Navigator" ? 2 : 2)));
 
-      if (!voterId || !targetId) return toast("Select voter and target.");
-      if (state.hasVoted.has(voterId)) return toast("That voter already voted this round.");
+      // Community-minded voters weight need and group value
+      if (voter.selfish === 0) {
+        score += need * 1.2;
+        score += groupSkillValue * 1.0;
+      }
+      // Mixed voters balance
+      if (voter.selfish === 1) {
+        score += need * 0.7;
+        score += groupSkillValue * 1.1;
+      }
+      // Selfish voters prioritize allies + power dynamics
+      if (voter.selfish === 2) {
+        score += groupSkillValue * 0.8;
+        score += (target.health >= 7 ? 1.0 : 0); // prefer strength
+        score -= need * 0.3; // less likely to help vulnerable
+      }
 
-      state.currentRoundVotes.push({ voterId, targetId, reason });
-      state.hasVoted.add(voterId);
-      $("reasonInput").value = "";
+      // Alliance bias
+      if (voter.allyIdLastRound === target.id) score += 3 + voter.allianceNeed;
 
-      updateVotePills();
-      toast("Vote recorded.");
+      // Reciprocity
+      if (voter.helpedLastRoundBy === target.id) score += 2;
+
+      // Selfish voters avoid empowering very strong competitors (unless allied)
+      if (voter.selfish === 2 && target.health >= 9 && voter.allyIdLastRound !== target.id) score -= 1.5;
+
+      // If target is voter themself: selfish voters often self-vote
+      if (target.id === voter.id) score += (voter.selfish === 2 ? 2.5 : 0.2);
+
+      // Build a simple reason string (used in log)
+      const reasonParts = [];
+      if (voter.allyIdLastRound === target.id) reasonParts.push("alliance");
+      if (target.health <= 4) reasonParts.push("low health");
+      if (target.skill === "Medic") reasonParts.push("medic");
+      if (target.skill === "Hunter") reasonParts.push("food/water skill");
+      if (!reasonParts.length) reasonParts.push("best odds");
+      const reason = `I voted ${target.name} because ${reasonParts.join(", ")}.`;
+
+      return { score, reason };
     }
 
-    function revealResult() {
-      if (!state.started) return;
-      if (state.currentRoundVotes.length === 0) return toast("No votes yet.");
-
-      // Tally votes (simple majority)
+    // Apply your pick + NPC votes to decide water recipient (majority including you)
+    function resolveWaterRecipient(playerPickId, npcVotesArr){
       const tally = new Map();
-      for (const p of state.players) tally.set(p.id, 0);
+      for (const c of state.chars) tally.set(c.id, 0);
 
-      for (const v of state.currentRoundVotes) {
+      // Your vote counts as 1
+      tally.set(playerPickId, (tally.get(playerPickId) || 0) + 1);
+
+      // NPC votes
+      for (const v of npcVotesArr) {
         tally.set(v.targetId, (tally.get(v.targetId) || 0) + 1);
       }
 
-      // Winner (highest). Tie => random among tied.
-      let max = -Infinity;
-      let winners = [];
-      for (const [pid, score] of tally.entries()) {
-        if (score > max) { max = score; winners = [pid]; }
-        else if (score === max) winners.push(pid);
+      let max = -1e9, winners = [];
+      for (const [id, n] of tally.entries()) {
+        if (n > max) { max = n; winners = [id]; }
+        else if (n === max) winners.push(id);
       }
-      const winnerId = winners[Math.floor(Math.random() * winners.length)];
-      const winnerName = playerName(winnerId);
-
-      // Consequence: winner becomes Speaker Captain NEXT round
-      const speakerCaptainForNextRoundId = winnerId;
-
-      const reasons = state.currentRoundVotes
-        .filter(v => v.reason && v.reason.length)
-        .map(v => v.reason);
-
-      // Save history
-      state.history.push({
-        round: state.round,
-        waterWinnerId: winnerId,
-        speakerCaptainForNextRoundId,
-        speakingOrderNextRound: [], // filled when finalized
-        reasons,
-        tally: Array.from(tally.entries()).map(([id, score]) => ({ id, score }))
-      });
-
-      // Update "next round captain"
-      state.speakerCaptainNextRoundFor = speakerCaptainForNextRoundId;
-
-      // UI
-      $("winnerLine").textContent = `${winnerName} (Water recipient)`;
-      $("powerLine").textContent = `${winnerName} becomes Speaker Captain next round (sets speaking order).`;
-      $("notesLine").textContent = winners.length > 1
-        ? `Tie resolved randomly among: ${winners.map(id => playerName(id)).join(", ")}.`
-        : `Clear winner with ${max} vote(s).`;
-
-      $("resultBox").classList.remove("hidden");
-      $("revealResultBtn").classList.add("hidden");
-
-      // Prepare next round / end
-      if (state.round >= state.totalRounds) {
-        setPhase("ended");
-        $("nextRoundBtn").classList.add("hidden");
-        toast("Game ended. Review history for debrief.");
-      } else {
-        setPhase("revealed");
-        $("nextRoundBtn").classList.remove("hidden");
-      }
-
-      // Update the order builder defaults
-      clearOrder();
-      renderHistory();
-      renderSpeakerCaptainBox();
+      const winnerId = winners[randInt(0, winners.length-1)];
+      return { winnerId, tally, max, tied: winners.length > 1, winners };
     }
 
-    function nextRound() {
-      if (state.round >= state.totalRounds) return;
+    // Update Community/Selfish scores based on fairness + alliances
+    function updateMeters(winnerId, npcVotesArr){
+      const winner = state.chars.find(c=>c.id===winnerId);
+      const player = state.chars.find(c=>c.isPlayer);
 
-      // Apply last round’s "next round" power now
-      const last = state.history[state.history.length - 1];
-      if (last) {
-        // Speaker Captain for THIS round = last round’s water recipient
-        state.speakerCaptainForThisRoundId = last.speakerCaptainForNextRoundId;
+      // "Need-based" choice increases community; "power-based" choice increases selfish
+      const need = 10 - winner.health;
 
-        // Speaking order for THIS round = what was finalized last round
-        state.speakingOrderForCurrentRound = Array.isArray(last.speakingOrderNextRound)
-          ? [...last.speakingOrderNextRound]
-          : [];
+      // Community-minded choice heuristic: low health or Medic/Hunter = community
+      const communityLean = (winner.health <= 4 ? 2 : 0) + (winner.skill === "Medic" ? 2 : 0) + (winner.skill === "Hunter" ? 1 : 0);
+      const selfishLean = (winner.health >= 8 ? 2 : 0) + (winner.selfish === 2 ? 1 : 0);
 
-        // If they forgot to finalize, default to captain first then everyone
-        if (!state.speakingOrderForCurrentRound.length && state.speakerCaptainForThisRoundId) {
-          const cap = state.speakerCaptainForThisRoundId;
-          const others = state.players.map(p => p.id).filter(id => id !== cap);
-          state.speakingOrderForCurrentRound = [cap, ...others];
+      // Shift scores slightly each round
+      state.community = clamp(state.community + (communityLean >= selfishLean ? 1 : 0), 0, 10);
+      state.selfish   = clamp(state.selfish   + (selfishLean > communityLean ? 1 : 0), 0, 10);
+
+      // Betrayal: if an NPC has an ally but voted against them, increase selfish
+      for (const v of npcVotesArr) {
+        const voter = state.chars.find(c=>c.id===v.voterId);
+        if (!voter) continue;
+        if (voter.allyIdLastRound && voter.allyIdLastRound !== v.targetId) {
+          state.selfish = clamp(state.selfish + 1, 0, 10);
+          logLine(`<span class="small bad">Betrayal:</span> ${escapeHtml(voter.name)} didn’t vote with their ally.`);
         }
       }
 
-      setRound(state.round + 1);
-      setPhase("setup");
-      resetRoundState();
-      renderSpeakerCaptainBox();
-      toast(`Round ${state.round} ready. Speaker Captain sets speaking order.`);
+      // Global effect: if community > selfish, small heal; if selfish > community, small damage
+      if (state.community > state.selfish) {
+        for (const c of state.chars) c.health = clamp(c.health + 1, 0, 10);
+        logLine(`<span class="good">Group Effect:</span> Community dominates → everyone gains +1 Health.`);
+      } else if (state.selfish > state.community) {
+        for (const c of state.chars) c.health = clamp(c.health - 1, 0, 10);
+        logLine(`<span class="bad">Group Effect:</span> Selfish dominates → everyone loses -1 Health.`);
+      } else {
+        logLine(`<span class="muted">Group Effect:</span> Scores tied → no global change.`);
+      }
+
+      // Track who helped whom (for reciprocity next round): winner "helped" everyone who voted for them
+      for (const v of npcVotesArr) {
+        const voter = state.chars.find(c=>c.id===v.voterId);
+        if (voter && v.targetId === winnerId) voter.helpedLastRoundBy = winnerId;
+      }
+      // If you voted for winner, you consider them as helping you (can affect their alliance with you indirectly)
+      if (playerPickId === winnerId) player.helpedLastRoundBy = winnerId;
     }
 
-    // ---------------------------
-    // UI wiring
-    // ---------------------------
-    $("addPlayerBtn").onclick = () => {
-      const name = $("playerName").value.trim();
-      if (!name) return toast("Enter a name.");
-      if (state.players.some(p => p.name.toLowerCase() === name.toLowerCase()))
-        return toast("That name is already added.");
-      state.players.push({ id: uid(), name });
-      $("playerName").value = "";
-      renderPlayers();
+    // Suggest pick for player (simple heuristic)
+    function suggestPick(){
+      // Prefer lowest health among active, with tie-breaker for Medic/Hunter
+      const active = state.chars.filter(c => state.round >= c.collapsedUntilRound);
+      active.sort((a,b) => {
+        const aScore = (a.health) + (a.skill === "Medic" ? -1 : 0) + (a.skill === "Hunter" ? -0.5 : 0);
+        const bScore = (b.health) + (b.skill === "Medic" ? -1 : 0) + (b.skill === "Hunter" ? -0.5 : 0);
+        return aScore - bScore;
+      });
+      return active[0]?.id || state.chars[0]?.id;
+    }
+
+    // ----------------------------
+    // Round Runner
+    // ----------------------------
+    let playerPickId = null;
+
+    function runRoundStart(){
+      // advance round
+      state.round += 1;
+      state.pendingPickId = null;
+      playerPickId = null;
+
+      logLine(`<span class="name">— Round ${state.round} begins —</span>`);
+
+      // health tick
+      applyHealthTick();
+      logLine(`<span class="muted">Health tick applied (based on Independence).</span>`);
+
+      // compute alliances
+      const alliances = computeAlliances();
+      if (alliances.length) {
+        const pretty = alliances.map(([a,b]) => `${state.chars.find(c=>c.id===a).name} ↔ ${state.chars.find(c=>c.id===b).name}`).join(", ");
+        logLine(`<span class="warn">Alliances formed:</span> ${escapeHtml(pretty)}`);
+      } else {
+        logLine(`<span class="muted">No alliances formed this round.</span>`);
+      }
+
+      // dialogue in captain-influenced order
+      logLine(`<span class="muted">Discussion (Speaker Captain influences order):</span>`);
+      npcDialogue();
+
+      // enable player pick
+      state.pendingPickId = $("waterPick").value;
+      $("confirmPickBtn").disabled = false;
+
+      render();
+    }
+
+    function confirmPick(){
+      if (!state.pendingPickId) return;
+      playerPickId = state.pendingPickId;
+
+      const picked = state.chars.find(c=>c.id===playerPickId);
+      logLine(`<span class="name">${escapeHtml(picked.name)}</span> was chosen by <span class="tag">You</span> to receive <b>Water</b>.`);
+
+      // NPC votes
+      const votes = npcVotes();
+      // Log a few vote reasons to keep it minimal
+      const sample = votes.slice(0, 3);
+      for (const v of sample) {
+        const voter = state.chars.find(c=>c.id===v.voterId);
+        logLine(`<span class="small muted">${escapeHtml(voter.name)}:</span> ${escapeHtml(v.reason)}`);
+      }
+      if (votes.length > sample.length) {
+        logLine(`<span class="small muted">(+${votes.length - sample.length} more NPC votes)</span>`);
+      }
+
+      // Resolve winner
+      const result = resolveWaterRecipient(playerPickId, votes);
+      const winner = state.chars.find(c=>c.id===result.winnerId);
+
+      // Apply consequence: winner becomes next round’s Speaker Captain
+      state.speakerCaptainId = winner.id;
+
+      // Announce tally (compact)
+      const tallyStr = Array.from(result.tally.entries())
+        .map(([id,n]) => `${state.chars.find(c=>c.id===id).name}:${n}`)
+        .sort((a,b)=> {
+          const na = parseInt(a.split(":").pop(),10);
+          const nb = parseInt(b.split(":").pop(),10);
+          return nb - na;
+        })
+        .join(" · ");
+
+      logLine(`<b>Water recipient (group vote):</b> <span class="name">${escapeHtml(winner.name)}</span> ${result.tied ? `<span class="small warn">(tie-break)</span>` : ""}`);
+      logLine(`<span class="small muted">Tally:</span> <span class="small">${escapeHtml(tallyStr)}</span>`);
+      logLine(`<b>Consequence:</b> ${escapeHtml(winner.name)} becomes <span class="tag">Speaker Captain</span> next round (controls speaking order).`);
+
+      // Update meters + global effects
+      updateMeters(result.winnerId, votes);
+
+      // Check game over
+      const over = isGameOver();
+      if (over.over) {
+        logLine(`<span class="bad"><b>Game Over:</b></span> ${escapeHtml(over.reason)}`);
+        $("nextRoundBtn").disabled = true;
+      } else if (state.round >= state.maxRounds) {
+        logLine(`<span class="good"><b>End:</b></span> You survived ${state.maxRounds} rounds. Review patterns in who gained voice and resources.`);
+        $("nextRoundBtn").disabled = true;
+      }
+
+      // clear pending
+      state.pendingPickId = null;
+      playerPickId = null;
+      $("confirmPickBtn").disabled = true;
+
+      render();
+    }
+
+    // ----------------------------
+    // Game Setup / Reset
+    // ----------------------------
+    function setupNewGame(){
+      state.started = true;
+      state.round = 0;
+      state.maxRounds = 8;
+      state.community = 6;
+      state.selfish = 4;
+      state.speakerCaptainId = null;
+      state.pendingPickId = null;
+      playerPickId = null;
+
+      // create player + 4 NPCs (minimal)
+      const used = new Set();
+      function uniqueName(){
+        let n;
+        do { n = pick(NAMES); } while (used.has(n));
+        used.add(n);
+        return n;
+      }
+
+      state.chars = [
+        newChar({name: "You", isPlayer: true}),
+        newChar({name: uniqueName()}),
+        newChar({name: uniqueName()}),
+        newChar({name: uniqueName()}),
+        newChar({name: uniqueName()}),
+      ];
+
+      clearLog();
+      logLine(`<span class="name">New Game</span> — You are stranded with 4 NPCs. No one is eliminated; power shifts through voice.`);
+      logLine(`<span class="muted">Click “Run Next Round” to begin.</span>`);
+
+      $("nextRoundBtn").disabled = false;
+      $("confirmPickBtn").disabled = true;
+
+      render();
+    }
+
+    function resetAll(){
+      state.started = false;
+      state.round = 0;
+      state.community = 0;
+      state.selfish = 0;
+      state.speakerCaptainId = null;
+      state.chars = [];
+      state.pendingPickId = null;
+      playerPickId = null;
+
+      clearLog();
+      render();
+    }
+
+    // ----------------------------
+    // Wiring
+    // ----------------------------
+    $("newGameBtn").onclick = setupNewGame;
+
+    $("nextRoundBtn").onclick = () => {
+      const over = isGameOver();
+      if (over.over) return;
+      if (!state.started) return;
+      if (state.round >= state.maxRounds) return;
+      runRoundStart();
     };
 
-    $("playerName").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") $("addPlayerBtn").click();
+    $("waterPick").addEventListener("change", () => {
+      state.pendingPickId = $("waterPick").value;
+      $("confirmPickBtn").disabled = !state.started || state.round === 0 || !state.pendingPickId;
     });
 
-    $("startGameBtn").onclick = startGame;
+    $("confirmPickBtn").onclick = confirmPick;
 
-    $("resetBtn").onclick = () => {
-      stopTimer();
-      Object.assign(state, {
-        started: false,
-        round: 0,
-        totalRounds: 4,
-        phase: "setup",
-        players: [],
-        speakerCaptainNextRoundFor: null,
-        speakerCaptainForThisRoundId: null,
-        speakingOrderForCurrentRound: [],
-        currentRoundVotes: [],
-        hasVoted: new Set(),
-        history: []
-      });
-      $("gameNotStarted").classList.remove("hidden");
-      $("gameStarted").classList.add("hidden");
-      setRound(0);
-      setPhase("setup");
-      renderPlayers();
-      renderHistory();
-      renderSpeakerCaptainBox();
-      toast("Reset.");
+    $("autoPickBtn").onclick = () => {
+      if (!state.started || state.round === 0) return;
+      const id = suggestPick();
+      if (!id) return;
+      $("waterPick").value = id;
+      state.pendingPickId = id;
+      $("confirmPickBtn").disabled = false;
+      const c = state.chars.find(x=>x.id===id);
+      logLine(`<span class="muted small">Suggestion:</span> Consider giving Water to <b>${escapeHtml(c.name)}</b> (lowest need/skill heuristic).`);
     };
 
-    $("toggleTimerBtn").onclick = () => {
-      const secs = clampInt($("timerSeconds").value, 0, 600);
-      if (!state.timerEnabled) {
-        state.timerEnabled = true;
-        state.timerSeconds = secs;
-        $("toggleTimerBtn").textContent = "Disable Timer";
-        state.timerRemaining = secs;
-        updateTimerPill();
-        toast("Timer enabled.");
-      } else {
-        stopTimer();
-        state.timerEnabled = false;
-        $("toggleTimerBtn").textContent = "Enable Timer";
-        updateTimerPill();
-        toast("Timer disabled.");
-      }
-    };
+    $("resetBtn").onclick = resetAll;
 
-    $("beginVotingBtn").onclick = beginVoting;
-    $("endVotingBtn").onclick = endVoting;
-
-    $("markVotedBtn").onclick = () => {
-      const voterSel = $("voterSelect");
-      const ids = state.players.map(p => p.id);
-      const current = voterSel.value;
-      const idx = Math.max(0, ids.indexOf(current));
-      for (let i = 1; i <= ids.length; i++) {
-        const nextId = ids[(idx + i) % ids.length];
-        if (!state.hasVoted.has(nextId)) {
-          voterSel.value = nextId;
-          toast("Next voter selected.");
-          return;
-        }
-      }
-      toast("All voters have voted.");
-    };
-
-    $("submitVoteBtn").onclick = submitVote;
-    $("revealResultBtn").onclick = revealResult;
-    $("nextRoundBtn").onclick = nextRound;
-
-    // Order builder buttons
-    $("orderAddBtn").onclick = () => addToOrder($("orderAddSelect").value);
-    $("orderClearBtn").onclick = clearOrder;
-    $("orderAutoBtn").onclick = () => {
-      const last = state.history[state.history.length - 1];
-      const captainId = last?.speakerCaptainForNextRoundId || null;
-      if (!captainId) return toast("Reveal a result first.");
-      autoOrderCaptainFirst(captainId);
-    };
-    $("orderFinalizeBtn").onclick = () => {
-      const last = state.history[state.history.length - 1];
-      const captainId = last?.speakerCaptainForNextRoundId || null;
-      if (!captainId) return toast("Reveal a result first.");
-      finalizeOrderForNextRound(captainId);
-    };
-
-    // Initial render
-    renderPlayers();
-    renderSelects();
-    setRound(0);
-    setPhase("setup");
-    updateTimerPill();
+    // initial
+    resetAll();
   </script>
 </body>
 </html>
